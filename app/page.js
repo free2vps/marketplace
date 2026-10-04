@@ -13,7 +13,10 @@ export default async function HomePage() {
   return (
     <main style={{ padding: 24, fontFamily: 'sans-serif' }}>
       <h1>Marketplace UMKM Taliwang</h1>
-      <p>Halaman ini adalah test koneksi ke Supabase.</p>
+      <p>
+        Punya usaha di Taliwang? <a href="/daftar-toko">Daftarkan tokomu</a> atau{' '}
+        <a href="/masuk-toko">masuk ke dashboard</a>.
+      </p>
 
       {error && (
         <p style={{ color: 'red' }}>
