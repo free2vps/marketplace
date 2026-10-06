@@ -3,6 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import SiteHeader from '../components/SiteHeader';
+
+const STATUS = {
+  active: { label: 'Aktif', className: 'badge badge-ok' },
+  pending_verification: { label: 'Menunggu verifikasi', className: 'badge badge-warn' },
+  inactive: { label: 'Belum aktif', className: 'badge badge-warn' },
+};
 
 export default function DashboardTokoPage() {
   const router = useRouter();
@@ -37,39 +44,67 @@ export default function DashboardTokoPage() {
     router.push('/masuk-toko');
   }
 
+  const logoutButton = (
+    <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
+      Keluar
+    </button>
+  );
+
   if (loading) {
-    return <main style={{ padding: 24, fontFamily: 'sans-serif' }}>Memuat...</main>;
+    return (
+      <>
+        <SiteHeader>{logoutButton}</SiteHeader>
+        <main className="container-narrow">Memuat...</main>
+      </>
+    );
   }
 
+  const isActive = store?.subscription_status === 'active';
+  const status = STATUS[store?.subscription_status] || STATUS.inactive;
+
   return (
-    <main style={{ maxWidth: 600, margin: '40px auto', padding: 24, fontFamily: 'sans-serif' }}>
-      <h1>Dashboard Toko</h1>
+    <>
+      <SiteHeader>{logoutButton}</SiteHeader>
+      <main className="container-narrow">
+        {store ? (
+          <>
+            <div className="page-head">
+              <div>
+                <h1>{store.name}</h1>
+                <span className={status.className}>{status.label}</span>
+              </div>
+              {isActive ? (
+                <a className="btn btn-gold" href="/dashboard-toko/produk">
+                  Kelola produk
+                </a>
+              ) : (
+                <button className="btn btn-gold" disabled>
+                  Kelola produk
+                </button>
+              )}
+            </div>
 
-      {store ? (
-        <>
-          <p>
-            <strong>{store.name}</strong>
-          </p>
-          <p>Status langganan: {store.subscription_status}</p>
-          <p>No HP: {store.phone}</p>
-          <p>Alamat: {store.address || '-'}</p>
+            {!isActive && (
+              <div className="alert alert-warn">
+                Toko kamu belum aktif. Selesaikan pembayaran langganan supaya
+                bisa mengelola produk dan tampil di halaman utama.
+              </div>
+            )}
 
-          {store.subscription_status !== 'active' && (
-            <p style={{ color: '#b45309' }}>
-              Toko kamu belum aktif. Lengkapi pembayaran langganan supaya bisa
-              mulai jualan dan tampil di halaman utama.
-            </p>
-          )}
-
-          <button disabled>Tambah Produk (segera hadir)</button>
-        </>
-      ) : (
-        <p>Profil toko tidak ditemukan.</p>
-      )}
-
-      <div style={{ marginTop: 24 }}>
-        <button onClick={handleLogout}>Keluar</button>
-      </div>
-    </main>
+            <section className="panel">
+              <h2>Data toko</h2>
+              <dl className="dl">
+                <dt>Nomor HP</dt>
+                <dd>{store.phone}</dd>
+                <dt>Alamat</dt>
+                <dd>{store.address || '-'}</dd>
+              </dl>
+            </section>
+          </>
+        ) : (
+          <div className="empty">Profil toko tidak ditemukan.</div>
+        )}
+      </main>
+    </>
   );
 }

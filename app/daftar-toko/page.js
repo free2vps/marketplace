@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import SiteHeader from '../components/SiteHeader';
 
 export default function DaftarTokoPage() {
   const router = useRouter();
@@ -41,8 +42,8 @@ export default function DaftarTokoPage() {
     if (!userId || !authData.session) {
       setError(
         'Akun dibuat, tapi sesi login belum aktif (biasanya karena konfirmasi ' +
-        'email masih diwajibkan). Matikan "Confirm email" di Supabase > ' +
-        'Authentication > Providers > Email untuk tahap pengembangan ini.'
+          'email masih diwajibkan). Matikan "Confirm email" di Supabase > ' +
+          'Authentication > Sign In / Providers > Email untuk tahap pengembangan ini.'
       );
       setLoading(false);
       return;
@@ -73,57 +74,88 @@ export default function DaftarTokoPage() {
   }
 
   return (
-    <main style={{ maxWidth: 420, margin: '40px auto', padding: 24, fontFamily: 'sans-serif' }}>
-      <h1>Daftar Toko</h1>
-      <p>Buat akun untuk mulai jualan di Marketplace UMKM Taliwang.</p>
+    <>
+      <SiteHeader />
+      <div className="auth">
+        <aside className="auth-aside">
+          <h2>Buka tokomu di depan pembeli Taliwang</h2>
+          <p>
+            Daftar, aktifkan langganan, lalu atur sendiri produk dan harga
+            tokomu.
+          </p>
+        </aside>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          required
-          type="text"
-          placeholder="Nama toko"
-          value={form.name}
-          onChange={(e) => update('name', e.target.value)}
-        />
-        <input
-          required
-          type="tel"
-          placeholder="Nomor HP/WhatsApp"
-          value={form.phone}
-          onChange={(e) => update('phone', e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Alamat toko"
-          value={form.address}
-          onChange={(e) => update('address', e.target.value)}
-        />
-        <input
-          required
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => update('email', e.target.value)}
-        />
-        <input
-          required
-          type="password"
-          placeholder="Password (min. 6 karakter)"
-          minLength={6}
-          value={form.password}
-          onChange={(e) => update('password', e.target.value)}
-        />
+        <main className="auth-main">
+          <div className="auth-card">
+            <h1>Daftar toko</h1>
+            <p className="muted">Isi data tokomu untuk membuat akun penjual.</p>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label htmlFor="name">Nama toko</label>
+                <input
+                  id="name"
+                  required
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => update('name', e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="phone">Nomor HP / WhatsApp</label>
+                <input
+                  id="phone"
+                  required
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => update('phone', e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="address">Alamat toko</label>
+                <input
+                  id="address"
+                  type="text"
+                  value={form.address}
+                  onChange={(e) => update('address', e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => update('email', e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="password">Kata sandi</label>
+                <input
+                  id="password"
+                  required
+                  type="password"
+                  minLength={6}
+                  value={form.password}
+                  onChange={(e) => update('password', e.target.value)}
+                />
+                <span className="hint muted small">Minimal 6 karakter.</span>
+              </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Memproses...' : 'Daftar'}
-        </button>
-      </form>
+              {error && <div className="alert alert-error">{error}</div>}
 
-      <p style={{ marginTop: 16 }}>
-        Sudah punya akun? <a href="/masuk-toko">Masuk di sini</a>
-      </p>
-    </main>
+              <button className="btn btn-navy btn-block" type="submit" disabled={loading}>
+                {loading ? 'Memproses...' : 'Daftar toko'}
+              </button>
+            </form>
+
+            <p className="muted" style={{ marginTop: 20 }}>
+              Sudah punya akun? <a href="/masuk-toko">Masuk</a>
+            </p>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }

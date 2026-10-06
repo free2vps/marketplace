@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import SiteHeader from '../components/SiteHeader';
 
 export default function MasukTokoPage() {
   const router = useRouter();
@@ -31,35 +32,57 @@ export default function MasukTokoPage() {
   }
 
   return (
-    <main style={{ maxWidth: 420, margin: '40px auto', padding: 24, fontFamily: 'sans-serif' }}>
-      <h1>Masuk Toko</h1>
+    <>
+      <SiteHeader />
+      <div className="auth">
+        <aside className="auth-aside">
+          <h2>Kelola tokomu dari satu tempat</h2>
+          <p>
+            Masuk untuk melihat status toko dan mengatur produk yang tampil ke
+            pembeli.
+          </p>
+        </aside>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <input
-          required
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          required
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
+        <main className="auth-main">
+          <div className="auth-card">
+            <h1>Masuk</h1>
+            <p className="muted">Gunakan email dan kata sandi akun tokomu.</p>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  required
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="password">Kata sandi</label>
+                <input
+                  id="password"
+                  required
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                />
+              </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Memproses...' : 'Masuk'}
-        </button>
-      </form>
+              {error && <div className="alert alert-error">{error}</div>}
 
-      <p style={{ marginTop: 16 }}>
-        Belum punya akun? <a href="/daftar-toko">Daftar di sini</a>
-      </p>
-    </main>
+              <button className="btn btn-navy btn-block" type="submit" disabled={loading}>
+                {loading ? 'Memproses...' : 'Masuk'}
+              </button>
+            </form>
+
+            <p className="muted" style={{ marginTop: 20 }}>
+              Belum punya akun? <a href="/daftar-toko">Daftarkan toko</a>
+            </p>
+          </div>
+        </main>
+      </div>
+    </>
   );
 }
