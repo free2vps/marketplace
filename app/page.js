@@ -80,7 +80,7 @@ export default async function HomePage({ searchParams }) {
 
   const { data: topStores } = await supabase
     .from('stores')
-    .select('id, name, slug, address, is_boosted, rating_avg, rating_count')
+    .select('id, name, slug, logo_url, address, is_boosted, rating_avg, rating_count')
     .eq('subscription_status', 'active')
     .order('is_boosted', { ascending: false })
     .order('rating_avg', { ascending: false })

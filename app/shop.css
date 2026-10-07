@@ -90,3 +90,12 @@ select:focus { border-color: var(--navy-700); }
 .product-main { display: flex; gap: 12px; align-items: center; min-width: 0; }
 .thumb { flex: none; width: 56px; height: 56px; border-radius: 8px; object-fit: cover; background: #dfe5f0; }
 .price-old { margin-left: 6px; color: var(--muted); font-size: 0.82rem; text-decoration: line-through; font-family: var(--font-body); font-weight: 400; }
+
+/* ---------- Logo toko & ulasan ---------- */
+.store-logo { flex: none; width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-500); background: #fff; }
+.store-logo-lg { width: 84px; height: 84px; }
+.review-section { margin-top: 44px; }
+.review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.review { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.review p { margin: 6px 0 8px; }
+.review-stars { color: var(--gold-500); letter-spacing: 2px; }

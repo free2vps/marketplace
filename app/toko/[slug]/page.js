@@ -11,7 +11,7 @@ export const revalidate = 0;
 export default async function TokoPage({ params, searchParams }) {
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, slug, description, address, phone, is_boosted, is_open, rating_avg, rating_count')
+    .select('id, name, slug, logo_url, description, address, phone, is_boosted, is_open, rating_avg, rating_count')
     .eq('slug', params.slug)
     .maybeSingle();
 
@@ -25,6 +25,13 @@ export default async function TokoPage({ params, searchParams }) {
     .eq('store_id', store.id)
     .eq('is_available', true)
     .order('created_at', { ascending: false });
+
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('id, rating, comment, created_at')
+    .eq('store_id', store.id)
+    .order('created_at', { ascending: false })
+    .limit(6);
 
   const categories = [];
   const seen = new Set();
@@ -49,9 +56,13 @@ export default async function TokoPage({ params, searchParams }) {
 
       <section className="store-banner">
         <div className="store-banner-inner">
-          <div className="monogram monogram-lg" aria-hidden="true">
-            {store.name.trim().charAt(0).toUpperCase()}
-          </div>
+          {store.logo_url ? (
+            <img className="store-logo store-logo-lg" src={store.logo_url} alt="" />
+          ) : (
+            <div className="monogram monogram-lg" aria-hidden="true">
+              {store.name.trim().charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="grow">
             <h1>{store.name}</h1>
             <p>
@@ -106,6 +117,30 @@ export default async function TokoPage({ params, searchParams }) {
               <ProductCard key={p.id} product={p} showStore={false} />
             ))}
           </div>
+        )}
+
+        {reviews?.length > 0 && (
+          <section className="review-section">
+            <h2>Ulasan pembeli</h2>
+            <ul className="review-list">
+              {reviews.map((r) => (
+                <li key={r.id} className="review">
+                  <div className="review-stars" aria-label={`${r.rating} dari 5 bintang`}>
+                    {'★'.repeat(r.rating)}
+                    {'☆'.repeat(5 - r.rating)}
+                  </div>
+                  {r.comment && <p>{r.comment}</p>}
+                  <span className="muted small">
+                    {new Date(r.created_at).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </main>
     </>

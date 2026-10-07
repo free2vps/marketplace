@@ -6,9 +6,13 @@ export default function StoreCard({ store }) {
       className={`store-card${store.is_boosted ? ' featured' : ''}`}
       href={`/toko/${store.slug}`}
     >
-      <div className="monogram" aria-hidden="true">
-        {store.name.trim().charAt(0).toUpperCase()}
-      </div>
+      {store.logo_url ? (
+        <img className="store-logo" src={store.logo_url} alt="" loading="lazy" />
+      ) : (
+        <div className="monogram" aria-hidden="true">
+          {store.name.trim().charAt(0).toUpperCase()}
+        </div>
+      )}
       <div className="store-info">
         <h3>{store.name}</h3>
         {store.is_boosted && <span className="badge badge-gold">Pilihan</span>}
