@@ -45,7 +45,7 @@ export default async function HomePage({ searchParams }) {
   let query = supabase
     .from('products')
     .select(
-      'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug)'
+      'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug, logo_url)'
     )
     .eq('is_available', true);
 
@@ -151,7 +151,7 @@ export default async function HomePage({ searchParams }) {
         {products.length > 0 && (
           <div className="product-grid">
             {products.map((p) => (
-              <ProductCard key={p.id} product={p} href={`/toko/${p.stores?.slug}`} />
+              <ProductCard key={p.id} product={p} href={`/produk/${p.id}`} />
             ))}
           </div>
         )}

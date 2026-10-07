@@ -99,3 +99,79 @@ select:focus { border-color: var(--navy-700); }
 .review { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
 .review p { margin: 6px 0 8px; }
 .review-stars { color: var(--gold-500); letter-spacing: 2px; }
+
+/* ============================================================
+   Tahap detail produk
+   ============================================================ */
+
+/* ---------- Warna mencolok: bintang & jumlah terjual ---------- */
+.star { color: #f59e0b; }
+.pcard-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px; font-size: 0.8rem; }
+.pcard-rating { display: inline-flex; align-items: center; gap: 3px; font-weight: 700; color: var(--ink); }
+.pcard-rating .star { font-size: 1rem; }
+.pcard-sold { background: #047857; color: #fff; border-radius: 6px; padding: 1px 8px; font-weight: 700; font-size: 0.76rem; white-space: nowrap; }
+.pcard-new { background: #3730a3; color: #fff; border-radius: 6px; padding: 1px 8px; font-weight: 700; font-size: 0.76rem; }
+.pcard-store { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--muted); font-size: 0.78rem; min-width: 0; }
+.pcard-store span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.review-stars { color: #f59e0b; letter-spacing: 2px; font-size: 1.05rem; }
+
+/* ---------- Ikon / logo toko ---------- */
+.avatar { flex: none; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold-500); background: #fff; display: inline-grid; place-items: center; }
+.avatar-mono { background: var(--navy-900); color: var(--gold-300); font-family: var(--font-display); }
+.avatar-sm { width: 22px; height: 22px; border-width: 1px; font-size: 0.7rem; }
+.avatar-md { width: 52px; height: 52px; font-size: 1.3rem; }
+.avatar-lg { width: 72px; height: 72px; font-size: 1.8rem; }
+.store-title { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.store-title h1 { margin: 0; }
+
+/* ---------- Navigasi: tombol kembali + jejak halaman ---------- */
+.page-nav { max-width: 1080px; margin: 0 auto; padding: 14px 20px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.back-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border: 1px solid var(--line); background: #fff; border-radius: 10px; font: 600 0.88rem var(--font-body); color: var(--ink); cursor: pointer; }
+.back-btn:hover { border-color: var(--navy-700); }
+.crumbs { list-style: none; display: flex; gap: 6px; flex-wrap: wrap; margin: 0; padding: 0; font-size: 0.88rem; color: var(--muted); }
+.crumbs li + li::before { content: '›'; margin-right: 6px; }
+.crumbs a { color: var(--muted); text-decoration: none; }
+.crumbs a:hover { color: var(--ink); text-decoration: underline; }
+.crumbs [aria-current='page'] { color: var(--ink); font-weight: 600; }
+.store-banner + .container, .page-nav + .container { padding-top: 24px; }
+
+/* ---------- Halaman produk ---------- */
+.pdp { display: grid; gap: 28px; grid-template-columns: 1fr; }
+@media (min-width: 860px) { .pdp { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); } }
+.pdp-photo { position: relative; aspect-ratio: 1 / 1; border-radius: 14px; overflow: hidden; background: #dfe5f0; border: 1px solid var(--line); }
+.pdp-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pdp-nophoto { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); }
+.pdp-title { font-size: 1.7rem; margin: 0 0 10px; }
+.pdp-stats { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.pdp-rating { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 1.05rem; }
+.pdp-rating .star { font-size: 1.3rem; }
+.pdp-price-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.pdp-price { font-family: var(--font-display); font-size: 2.1rem; font-weight: 600; color: var(--navy-800); }
+.pdp-old { color: var(--muted); text-decoration: line-through; }
+.pdp-discount { background: var(--danger); color: #fff; border-radius: 6px; padding: 1px 8px; font-weight: 700; font-size: 0.85rem; }
+.pdp-promo-note { color: var(--danger); font-size: 0.88rem; font-weight: 600; margin: 4px 0 0; }
+.pdp-specs { display: grid; grid-template-columns: 110px 1fr; gap: 8px 16px; margin: 18px 0; }
+.pdp-specs dt { color: var(--muted); }
+.pdp-specs dd { margin: 0; }
+.pdp-desc { white-space: pre-line; max-width: 70ch; }
+.section { margin-top: 44px; }
+
+.order-box { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+.order-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.qty-label { font-weight: 600; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: #fff; overflow: hidden; }
+.qty button { width: 44px; height: 44px; border: 0; background: transparent; font-size: 1.3rem; cursor: pointer; color: var(--ink); }
+.qty button:hover:not(:disabled) { background: var(--paper); }
+.qty button:disabled { opacity: 0.4; cursor: not-allowed; }
+.qty input { width: 56px; min-height: 44px; border: 0; border-radius: 0; text-align: center; padding: 0; appearance: textfield; -moz-appearance: textfield; }
+.qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.order-total { display: flex; justify-content: space-between; align-items: baseline; margin: 14px 0; }
+.order-total strong { font-family: var(--font-display); font-size: 1.4rem; color: var(--navy-800); }
+
+.store-box { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin-top: 16px; }
+.store-box-main { display: flex; gap: 12px; align-items: center; flex: 1 1 200px; min-width: 0; color: inherit; text-decoration: none; }
+.store-box-main:hover strong { text-decoration: underline; }
+
+.review-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.review-name { font-weight: 700; }
+.verified { background: var(--ok-bg); color: var(--ok-ink); border-radius: 999px; padding: 1px 9px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; }

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { rupiah, productImage, activePromo, discountPercent } from '../../lib/media';
+import StoreAvatar from './StoreAvatar';
 
 export default function ProductCard({ product: p, href, showStore = true }) {
   const promo = activePromo(p);
@@ -23,11 +24,25 @@ export default function ProductCard({ product: p, href, showStore = true }) {
           {rupiah(promo ? Number(p.promo_price) : price)}
           {promo && <span className="pcard-old">{rupiah(price)}</span>}
         </div>
-        <div className="pcard-meta">
-          {p.rating_count > 0 ? `★ ${Number(p.rating_avg).toFixed(1)}` : 'Baru'}
-          {p.sold_count > 0 ? ` · ${p.sold_count} terjual` : ''}
+        <div className="pcard-stats">
+          {p.rating_count > 0 ? (
+            <span className="pcard-rating">
+              <span className="star" aria-hidden="true">
+                ★
+              </span>
+              {Number(p.rating_avg).toFixed(1)}
+            </span>
+          ) : (
+            <span className="pcard-new">Baru</span>
+          )}
+          {p.sold_count > 0 && <span className="pcard-sold">{p.sold_count} terjual</span>}
         </div>
-        {showStore && p.stores?.name && <div className="pcard-meta">{p.stores.name}</div>}
+        {showStore && p.stores?.name && (
+          <div className="pcard-store">
+            <StoreAvatar store={p.stores} size="sm" />
+            <span>{p.stores.name}</span>
+          </div>
+        )}
       </div>
     </>
   );

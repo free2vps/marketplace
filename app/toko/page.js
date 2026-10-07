@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { supabase } from '../../lib/supabase';
 import SearchHeader from '../components/SearchHeader';
 import StoreCard from '../components/StoreCard';
+import PageNav from '../components/PageNav';
 
 export const revalidate = 0;
 export const metadata = { title: 'Semua toko · UMKM Taliwang' };
@@ -18,10 +18,8 @@ export default async function SemuaTokoPage() {
   return (
     <>
       <SearchHeader />
+      <PageNav crumbs={[{ label: 'Semua toko' }]} />
       <main className="container">
-        <Link className="back-link" href="/">
-          &larr; Kembali ke beranda
-        </Link>
         <h1>Semua toko di Taliwang</h1>
 
         {error && <div className="alert alert-error">Toko belum bisa dimuat: {error.message}</div>}

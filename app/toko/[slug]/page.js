@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '../../../lib/supabase';
 import { whatsappLink } from '../../../lib/media';
 import SearchHeader from '../../components/SearchHeader';
+import PageNav from '../../components/PageNav';
+import StoreAvatar from '../../components/StoreAvatar';
 import ProductCard from '../../components/ProductCard';
 import TrackVisit from '../../components/TrackVisit';
 
@@ -11,27 +13,30 @@ export const revalidate = 0;
 export default async function TokoPage({ params, searchParams }) {
   const { data: store } = await supabase
     .from('stores')
-    .select('id, name, slug, logo_url, description, address, phone, is_boosted, is_open, rating_avg, rating_count')
+    .select(
+      'id, name, slug, logo_url, description, address, phone, is_boosted, is_open, rating_avg, rating_count'
+    )
     .eq('slug', params.slug)
     .maybeSingle();
 
   if (!store) notFound();
 
-  const { data: products, error } = await supabase
-    .from('products')
-    .select(
-      'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, categories(name, slug)'
-    )
-    .eq('store_id', store.id)
-    .eq('is_available', true)
-    .order('created_at', { ascending: false });
-
-  const { data: reviews } = await supabase
-    .from('reviews')
-    .select('id, rating, comment, created_at')
-    .eq('store_id', store.id)
-    .order('created_at', { ascending: false })
-    .limit(6);
+  const [{ data: products, error }, { data: reviews }] = await Promise.all([
+    supabase
+      .from('products')
+      .select(
+        'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, categories(name, slug)'
+      )
+      .eq('store_id', store.id)
+      .eq('is_available', true)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('reviews')
+      .select('id, rating, comment, reviewer_name, created_at')
+      .eq('store_id', store.id)
+      .order('created_at', { ascending: false })
+      .limit(6),
+  ]);
 
   const categories = [];
   const seen = new Set();
@@ -52,23 +57,25 @@ export default async function TokoPage({ params, searchParams }) {
   return (
     <>
       <SearchHeader />
+      <PageNav crumbs={[{ label: 'Semua toko', href: '/toko' }, { label: store.name }]} />
       <TrackVisit slug={store.slug} />
 
       <section className="store-banner">
         <div className="store-banner-inner">
-          {store.logo_url ? (
-            <img className="store-logo store-logo-lg" src={store.logo_url} alt="" />
-          ) : (
-            <div className="monogram monogram-lg" aria-hidden="true">
-              {store.name.trim().charAt(0).toUpperCase()}
-            </div>
-          )}
           <div className="grow">
-            <h1>{store.name}</h1>
+            <div className="store-title">
+              <StoreAvatar store={store} size="lg" />
+              <h1>{store.name}</h1>
+            </div>
             <p>
-              {store.rating_count > 0
-                ? `★ ${Number(store.rating_avg).toFixed(1)} (${store.rating_count} ulasan)`
-                : 'Belum ada ulasan'}
+              {store.rating_count > 0 ? (
+                <>
+                  <span className="star">★</span> <strong>{Number(store.rating_avg).toFixed(1)}</strong>{' '}
+                  ({store.rating_count} ulasan)
+                </>
+              ) : (
+                'Belum ada ulasan'
+              )}
               {store.address ? ` · ${store.address}` : ''}
             </p>
             {store.description && <p>{store.description}</p>}
@@ -114,7 +121,7 @@ export default async function TokoPage({ params, searchParams }) {
         {shown.length > 0 && (
           <div className="product-grid">
             {shown.map((p) => (
-              <ProductCard key={p.id} product={p} showStore={false} />
+              <ProductCard key={p.id} product={p} href={`/produk/${p.id}`} showStore={false} />
             ))}
           </div>
         )}
@@ -125,6 +132,10 @@ export default async function TokoPage({ params, searchParams }) {
             <ul className="review-list">
               {reviews.map((r) => (
                 <li key={r.id} className="review">
+                  <div className="review-head">
+                    <span className="review-name">{r.reviewer_name || 'Pembeli'}</span>
+                    <span className="verified">Pembeli terverifikasi</span>
+                  </div>
                   <div className="review-stars" aria-label={`${r.rating} dari 5 bintang`}>
                     {'★'.repeat(r.rating)}
                     {'☆'.repeat(5 - r.rating)}
