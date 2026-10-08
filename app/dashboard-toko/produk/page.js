@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabase';
 import { compressImage } from '../../../lib/image';
 import { rupiah, productImage, thumbPath, activePromo } from '../../../lib/media';
+import { loadSettings } from '../../../lib/settings';
+import { storeNetEstimate } from '../../../lib/fees';
 import SiteHeader from '../../components/SiteHeader';
 
 const emptyForm = {
@@ -59,6 +61,7 @@ export default function ProdukPage() {
   const router = useRouter();
   const [store, setStore] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [cfg, setCfg] = useState({ commissionOn: false, commissionPercent: 0 });
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [file, setFile] = useState(null);
@@ -98,6 +101,7 @@ export default function ProdukPage() {
         .single();
 
       setStore(storeData);
+      setCfg(await loadSettings(supabase));
 
       if (storeData?.subscription_status === 'active') {
         const { data: cats } = await supabase.from('categories').select('id, name').order('name');
@@ -318,6 +322,20 @@ export default function ProdukPage() {
 
   const currentImage = editing?.image_path ? productImage(editing.image_path, true) : null;
 
+  // Harga yang benar-benar dibayar pembeli (promo kalau ada) untuk perhitungan estimasi
+  const basePrice = Number(form.price);
+  let effPrice = Number.isFinite(basePrice) && basePrice > 0 ? basePrice : 0;
+  if (effPrice > 0 && form.promoMode === 'percent') {
+    const pct = Number(form.promoValue);
+    if (pct >= 1 && pct <= 90) effPrice = Math.round((effPrice * (100 - pct)) / 100);
+  } else if (effPrice > 0 && form.promoMode === 'fixed') {
+    const v = Number(form.promoValue);
+    if (v > 0 && v < effPrice) effPrice = v;
+  }
+  const estimate = cfg.commissionOn && effPrice > 0
+    ? storeNetEstimate(effPrice, cfg.commissionPercent)
+    : null;
+
   return (
     <>
       <SiteHeader>{logoutButton}</SiteHeader>
@@ -386,6 +404,12 @@ export default function ProdukPage() {
               value={form.price}
               onChange={(e) => update('price', e.target.value)}
             />
+            {estimate && (
+              <div className="net-estimate">
+                Komisi aplikasi {cfg.commissionPercent}%: {rupiah(estimate.commission)} per item.{' '}
+                <strong>Estimasi diterima toko: {rupiah(estimate.net)}</strong>
+              </div>
+            )}
           </div>
 
           <div className="field">

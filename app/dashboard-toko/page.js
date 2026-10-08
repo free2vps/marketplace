@@ -73,15 +73,20 @@ export default function DashboardTokoPage() {
                 <h1>{store.name}</h1>
                 <span className={status.className}>{status.label}</span>
               </div>
-              {isActive ? (
-                <a className="btn btn-gold" href="/dashboard-toko/produk">
-                  Kelola produk
+              <div className="actions">
+                {isActive ? (
+                  <a className="btn btn-gold" href="/dashboard-toko/produk">
+                    Kelola produk
+                  </a>
+                ) : (
+                  <button className="btn btn-gold" disabled>
+                    Kelola produk
+                  </button>
+                )}
+                <a className="btn btn-outline" href="/dashboard-toko/saldo">
+                  Saldo &amp; pencairan
                 </a>
-              ) : (
-                <button className="btn btn-gold" disabled>
-                  Kelola produk
-                </button>
-              )}
+              </div>
             </div>
 
             {!isActive && (
