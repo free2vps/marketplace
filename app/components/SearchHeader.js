@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CartLink from './CartLink';
 
 export default function SearchHeader({ q = '' }) {
   return (
@@ -22,7 +23,11 @@ export default function SearchHeader({ q = '' }) {
         </form>
 
         <nav className="nav">
-          <Link className="nav-link" href="/masuk-toko">
+          <Link className="nav-link" href="/pesanan">
+            Pesanan
+          </Link>
+          <CartLink />
+          <Link className="nav-link hide-sm" href="/masuk-toko">
             Masuk
           </Link>
           <Link className="btn btn-gold btn-sm hide-sm" href="/daftar-toko">

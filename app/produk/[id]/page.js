@@ -155,12 +155,8 @@ export default async function ProdukPage({ params }) {
             </dl>
 
             <OrderPanel
-              id={p.id}
-              name={p.name}
-              unitPrice={unitPrice}
-              stock={p.stock}
-              phone={store?.phone}
-              storeOpen={store?.is_open}
+              product={{ id: p.id, name: p.name, unitPrice, stock: p.stock, image_path: p.image_path }}
+              store={store}
             />
 
             {store && (
