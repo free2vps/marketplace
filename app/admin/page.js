@@ -150,6 +150,17 @@ export default function AdminPage() {
         ['Pesanan', summary.orders_total],
       ]
     : [];
+  // Pemasukan platform (dihitung admin_summary; lihat supabase/009_pendapatan_admin.sql)
+  const incomeCards = summary && summary.income_premium != null
+    ? [
+        ['Premium (masuk)', rupiah(summary.income_premium || 0)],
+        ['Banner (masuk)', rupiah(summary.income_banner || 0)],
+        ['Menunggu persetujuan', rupiah(summary.income_pending || 0)],
+        ['GMV 30 hari', rupiah(summary.gmv_30d || 0)],
+        ['Potensi komisi + fee 30 hari', rupiah(summary.fees_30d || 0)],
+        ['GMV sejak awal', rupiah(summary.gmv_total || 0)],
+      ]
+    : [];
 
   return (
     <>
@@ -166,6 +177,25 @@ export default function AdminPage() {
             </div>
           ))}
         </div>
+
+        {incomeCards.length > 0 && (
+          <>
+            <h2 style={{ marginTop: 8 }}>Pendapatan platform</h2>
+            <div className="stat-cards" style={{ paddingTop: 0 }}>
+              {incomeCards.map(([label, value]) => (
+                <div key={label} className="stat-card">
+                  <div className="stat-value" style={{ fontSize: '1.15rem' }}>{value}</div>
+                  <div className="muted small">{label}</div>
+                </div>
+              ))}
+            </div>
+            <p className="muted small" style={{ marginTop: -6 }}>
+              GMV menghitung pesanan selesai (COD diasumsikan tertagih). Komisi + fee adalah
+              potensi, bukan bukti dana diterima. Premium/banner berdasarkan transfer yang
+              disetujui di tab Pembayaran, bukan laba bersih.
+            </p>
+          </>
+        )}
 
         <div className="chip-row" style={{ paddingTop: 0 }}>
           {TABS.map(([key, label]) => (
