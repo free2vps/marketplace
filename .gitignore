@@ -1,0 +1,15 @@
+# Dependensi & build
+node_modules/
+.next/
+out/
+build/
+
+# Rahasia (jangan pernah masuk git)
+.env*
+!.env.local.example
+.vercel
+
+# Log & sistem
+*.log
+npm-debug.log*
+.DS_Store
