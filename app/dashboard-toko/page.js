@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import { loadSettings } from '../../lib/settings';
 import SiteHeader from '../components/SiteHeader';
 
 const STATUS = {
@@ -15,6 +16,8 @@ export default function DashboardTokoPage() {
   const router = useRouter();
   const [store, setStore] = useState(null);
   const [newOrders, setNewOrders] = useState(0);
+  const [productCount, setProductCount] = useState(0);
+  const [cfg, setCfg] = useState(null);
   const [shipping, setShipping] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -38,7 +41,10 @@ export default function DashboardTokoPage() {
         .single();
 
       setStore(storeData);
+      setCfg(await loadSettings(supabase));
       if (storeData) {
+        const pc = await supabase.from('products').select('id', { count: 'exact', head: true }).eq('store_id', storeData.id);
+        setProductCount(pc.count || 0);
         setShipping(String(storeData.flat_shipping_fee ?? 0));
         const { count } = await supabase
           .from('orders')
@@ -101,6 +107,8 @@ export default function DashboardTokoPage() {
   }
 
   const isActive = store?.subscription_status === 'active';
+  const premium = Boolean(store?.premium_until && new Date(store.premium_until) > new Date());
+  const limit = cfg?.freeProductLimit ?? 10;
   const status = STATUS[store?.subscription_status] || STATUS.inactive;
 
   return (
@@ -137,12 +145,53 @@ export default function DashboardTokoPage() {
 
             {!isActive && (
               <div className="alert alert-warn">
-                Toko kamu belum aktif. Selesaikan pembayaran langganan supaya bisa
-                mengelola produk dan tampil di halaman utama.
+                Toko kamu belum tayang. Pendaftaran baru diperiksa admin dulu; kamu akan bisa mengelola
+                produk dan tampil di beranda setelah disetujui.
               </div>
             )}
 
+            {isActive && (
+              <section className="panel plan-card">
+                <div>
+                  {premium ? (
+                    <>
+                      <span className="badge badge-ok">Premium</span>
+                      <div style={{ marginTop: 6 }}>
+                        Aktif sampai{' '}
+                        <strong>{new Date(store.premium_until).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</strong>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="badge badge-warn">Paket Gratis</span>
+                      <div style={{ marginTop: 6 }}>
+                        <strong>{productCount}</strong> dari {limit} produk terpakai
+                      </div>
+                      <div className="meter" aria-hidden="true"><div style={{ width: `${Math.min(100, (productCount / limit) * 100)}%` }} /></div>
+                    </>
+                  )}
+                </div>
+                <div className="actions">
+                  <a className="btn btn-gold btn-sm" href="/dashboard-toko/paket">
+                    {premium ? 'Perpanjang' : 'Tingkatkan ke Premium'}
+                  </a>
+                </div>
+              </section>
+            )}
+
             {notice && <div className="alert alert-warn">{notice}</div>}
+
+            {isActive && (
+              <section className="panel">
+                <h2>Promosi dan data</h2>
+                <div className="actions">
+                  <a className="btn btn-outline btn-sm" href="/dashboard-toko/banner">Sewa banner</a>
+                  <a className="btn btn-outline btn-sm" href="/dashboard-toko/statistik">
+                    Statistik pengunjung{premium ? '' : ' (Premium)'}
+                  </a>
+                </div>
+              </section>
+            )}
 
             <section className="panel">
               <h2>Pengaturan toko</h2>

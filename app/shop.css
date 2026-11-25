@@ -261,3 +261,58 @@ select:focus { border-color: var(--navy-700); }
 .order-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
 .order-card-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
 .order-card-head .muted { margin-left: auto; }
+
+/* ============================================================
+   Fase 1: paket, banner, statistik, admin, label
+   ============================================================ */
+.store-verified { display: inline-flex; vertical-align: middle; margin-left: 2px; }
+
+.banner-section { background: var(--paper); padding: 16px 20px 0; }
+.banner-wrap { max-width: 1080px; margin: 0 auto; }
+.banner-frame { position: relative; border-radius: 14px; overflow: hidden; background: #dfe5f0; border: 1px solid var(--line); }
+.banner-frame a { display: block; }
+.banner-frame img { display: block; width: 100%; height: auto; object-fit: cover; }
+.banner-label { position: absolute; top: 8px; left: 8px; background: rgba(10, 20, 40, 0.75); color: #fff; font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+.banner-dots { position: absolute; bottom: 8px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
+.banner-dots button { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(255, 255, 255, 0.55); cursor: pointer; }
+.banner-dots button.on { background: #fff; width: 22px; border-radius: 99px; }
+.banner-thumb { width: 96px; height: 40px; border-radius: 6px; }
+
+.meter { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 8px; max-width: 320px; }
+.meter > div { height: 100%; background: var(--gold-500); }
+.plan-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.plan-table { width: 100%; border-collapse: collapse; }
+.plan-table th, .plan-table td { padding: 10px 8px; border-top: 1px solid var(--line); text-align: center; font-size: 0.95rem; }
+.plan-table th { border-top: 0; color: var(--muted); font-weight: 600; }
+.plan-table td:first-child, .plan-table th:first-child { text-align: left; }
+.plan-table th:last-child, .plan-table td:last-child { background: #fbf6e6; }
+.transfer-box { background: var(--warn-bg); border: 1px solid #ebd79a; border-radius: 12px; padding: 14px 16px; margin: 4px 0 16px; }
+.transfer-amount { font-family: var(--font-display); font-size: 1.7rem; font-weight: 600; color: var(--navy-800); }
+
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.stat-value { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: var(--navy-800); }
+.bars { display: flex; align-items: flex-end; gap: 3px; height: 140px; }
+.bar-col { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.bar { width: 100%; background: var(--navy-700); border-radius: 3px 3px 0 0; }
+.bar-col:hover .bar { background: var(--gold-500); }
+.bars-axis { display: flex; justify-content: space-between; margin-top: 6px; }
+
+.admin-banner { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+.admin-banner img { width: 160px; max-width: 40%; border-radius: 8px; border: 1px solid var(--line); }
+.setting-edit { display: flex; gap: 8px; align-items: center; }
+.setting-edit input { min-height: 36px; padding: 6px 10px; width: 200px; max-width: 45vw; }
+
+.label-sheet { border: 2px solid #111; border-radius: 6px; padding: 16px; background: #fff; max-width: 480px; display: grid; gap: 12px; color: #111; }
+.label-head { display: flex; justify-content: space-between; font-size: 1.2rem; border-bottom: 2px solid #111; padding-bottom: 8px; }
+.label-cap { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+.label-big { font-size: 1.3rem; font-weight: 700; }
+.label-note { font-style: italic; margin-top: 4px; }
+.label-block ul { margin: 4px 0 0; padding-left: 18px; }
+.label-pay { border: 2px solid #111; padding: 10px; text-align: center; font-size: 1.05rem; }
+@media print {
+  .site-header, .no-print, .page-nav { display: none !important; }
+  body { background: #fff; }
+  .container-narrow { max-width: none; padding: 0; margin: 0; }
+  .label-sheet { max-width: none; border-radius: 0; }
+}

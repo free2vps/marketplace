@@ -9,9 +9,10 @@ export const metadata = { title: 'Semua toko · UMKM Taliwang' };
 export default async function SemuaTokoPage() {
   const { data: stores, error } = await supabase
     .from('stores')
-    .select('id, name, slug, logo_url, address, is_boosted, rating_avg, rating_count')
+    .select('id, name, slug, logo_url, address, is_boosted, verified_at, rating_avg, rating_count')
     .eq('subscription_status', 'active')
     .order('is_boosted', { ascending: false })
+    .order('is_premium', { ascending: false })
     .order('rating_avg', { ascending: false })
     .order('visit_count', { ascending: false });
 

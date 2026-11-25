@@ -5,6 +5,7 @@ import { rupiah, productImage, activePromo, discountPercent } from '../../../lib
 import SearchHeader from '../../components/SearchHeader';
 import PageNav from '../../components/PageNav';
 import StoreAvatar from '../../components/StoreAvatar';
+import VerifiedBadge from '../../components/VerifiedBadge';
 import ProductCard from '../../components/ProductCard';
 import OrderPanel from '../../components/OrderPanel';
 import TrackProductView from '../../components/TrackProductView';
@@ -12,7 +13,7 @@ import TrackProductView from '../../components/TrackProductView';
 export const revalidate = 0;
 
 const CARD =
-  'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug, logo_url)';
+  'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug, logo_url, verified_at)';
 
 const dateId = (iso) =>
   new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -21,7 +22,7 @@ export default async function ProdukPage({ params }) {
   const { data: p } = await supabase
     .from('products')
     .select(
-      'id, name, description, price, promo_price, promo_ends_at, image_path, stock, sold_count, view_count, rating_avg, rating_count, category_id, store_id, is_available, categories(name, slug), stores(id, name, slug, logo_url, phone, address, is_open, rating_avg, rating_count)'
+      'id, name, description, price, promo_price, promo_ends_at, image_path, stock, sold_count, view_count, rating_avg, rating_count, category_id, store_id, is_available, categories(name, slug), stores(id, name, slug, logo_url, phone, address, is_open, verified_at, rating_avg, rating_count)'
     )
     .eq('id', params.id)
     .maybeSingle();
@@ -164,7 +165,7 @@ export default async function ProdukPage({ params }) {
                 <Link href={`/toko/${store.slug}`} className="store-box-main">
                   <StoreAvatar store={store} size="md" />
                   <div>
-                    <strong>{store.name}</strong>
+                    <strong>{store.name}</strong> <VerifiedBadge store={store} />
                     <div className="muted small">
                       {store.rating_count > 0 && (
                         <>

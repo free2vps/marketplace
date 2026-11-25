@@ -12,8 +12,9 @@ import SearchHeader from '../components/SearchHeader';
 import PageNav from '../components/PageNav';
 import QtyStepper from '../components/QtyStepper';
 import StoreAvatar from '../components/StoreAvatar';
+import WebOrdersGate from '../components/WebOrdersGate';
 
-export default function KeranjangPage() {
+function KeranjangInner() {
   const { cart, ready } = useCart();
   const [data, setData] = useState(null);
   const [cfg, setCfg] = useState(null);
@@ -104,7 +105,11 @@ export default function KeranjangPage() {
               </div>
               <div className="sum-row">
                 <span>Ongkos kirim</span>
-                <span>{fees.shipping > 0 ? rupiah(fees.shipping) : 'Gratis'}</span>
+                <span>
+                  {cfg?.shippingMode === 'distance'
+                    ? 'Dihitung saat checkout'
+                    : fees.shipping > 0 ? rupiah(fees.shipping) : 'Gratis'}
+                </span>
               </div>
               {fees.serviceFee > 0 && (
                 <div className="sum-row">
@@ -130,5 +135,13 @@ export default function KeranjangPage() {
         )}
       </main>
     </>
+  );
+}
+
+export default function KeranjangPage() {
+  return (
+    <WebOrdersGate title="Keranjang">
+      <KeranjangInner />
+    </WebOrdersGate>
   );
 }

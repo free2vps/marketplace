@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import SearchHeader from './components/SearchHeader';
 import ProductCard from './components/ProductCard';
 import StoreCard from './components/StoreCard';
+import BannerCarousel from './components/BannerCarousel';
 
 export const revalidate = 0; // selalu ambil data terbaru
 
@@ -45,7 +46,7 @@ export default async function HomePage({ searchParams }) {
   let query = supabase
     .from('products')
     .select(
-      'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug, logo_url)'
+      'id, name, price, promo_price, promo_ends_at, image_path, sold_count, rating_avg, rating_count, stores(name, slug, logo_url, verified_at)'
     )
     .eq('is_available', true);
 
@@ -53,6 +54,9 @@ export default async function HomePage({ searchParams }) {
 
   const activeCategory = categories?.find((c) => c.slug === kategori);
   if (activeCategory) query = query.eq('category_id', activeCategory.id);
+
+  // Toko Premium mendapat prioritas hanya pada pencarian dan penelusuran kategori
+  if (q || activeCategory) query = query.order('priority', { ascending: false });
 
   if (tab === 'diskon') {
     query = query
@@ -78,9 +82,23 @@ export default async function HomePage({ searchParams }) {
   const hasMore = (rows?.length || 0) > limit;
   const products = (rows || []).slice(0, limit);
 
+  // Banner sewa yang sedang tayang (tabel hanya memberi banner yang disetujui dan dalam tanggalnya)
+  const [{ data: bannerRows }, { data: slotRows }] = await Promise.all([
+    supabase.from('banners').select('id, slot, title, image_path, link_type, link_value'),
+    supabase.from('banner_slots').select('key, width, height').eq('is_active', true),
+  ]);
+  const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
+  const bannersOf = (slot) => shuffle((bannerRows || []).filter((b) => b.slot === slot));
+  const ratioOf = (slot) => {
+    const sl = (slotRows || []).find((x) => x.key === slot);
+    return sl ? `${sl.width} / ${sl.height}` : '3 / 1';
+  };
+  const topBanners = bannersOf('home_top');
+  const middleBanners = bannersOf('home_middle');
+
   const { data: topStores } = await supabase
     .from('stores')
-    .select('id, name, slug, logo_url, address, is_boosted, rating_avg, rating_count')
+    .select('id, name, slug, logo_url, address, is_boosted, verified_at, rating_avg, rating_count')
     .eq('subscription_status', 'active')
     .order('is_boosted', { ascending: false })
     .order('rating_avg', { ascending: false })
@@ -101,6 +119,12 @@ export default async function HomePage({ searchParams }) {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {topBanners.length > 0 && (
+        <div className="banner-section">
+          <BannerCarousel banners={topBanners} ratio={ratioOf('home_top')} />
         </div>
       )}
 
@@ -164,6 +188,12 @@ export default async function HomePage({ searchParams }) {
             >
               Muat lebih banyak produk
             </Link>
+          </div>
+        )}
+
+        {middleBanners.length > 0 && (
+          <div style={{ marginTop: 40 }}>
+            <BannerCarousel banners={middleBanners} ratio={ratioOf('home_middle')} />
           </div>
         )}
 

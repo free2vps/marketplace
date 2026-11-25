@@ -3,20 +3,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { rupiah, whatsappLink } from '../../lib/media';
+import { rupiah } from '../../lib/media';
 import { addToCart } from '../../lib/cart';
+import { useSettings } from '../../lib/useSettings';
 import QtyStepper from './QtyStepper';
+import WhatsAppButton from './WhatsAppButton';
 
 // product: { id, name, unitPrice, stock, image_path }
 // store:   { id, name, slug, logo_url, phone, is_open }
+//
+// Fase 1 (bawaan): pesan langsung ke penjual lewat WhatsApp.
+// Fase 2 (saklar feature.web_orders hidup): keranjang dan checkout di aplikasi.
 export default function OrderPanel({ product, store }) {
   const router = useRouter();
+  const cfg = useSettings();
+  const webOrders = cfg?.webOrdersOn === true;
+
   const max = product.stock == null ? 99 : Math.max(product.stock, 0);
   const soldOut = max === 0;
   const closed = store?.is_open === false;
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
-  const wa = whatsappLink(store?.phone);
 
   function add(goCheckout) {
     setAdded(false);
@@ -41,11 +48,9 @@ export default function OrderPanel({ product, store }) {
     else setAdded(true);
   }
 
-  function askSeller() {
-    if (!wa) return;
-    const text = `Halo, saya ingin menanyakan produk ${product.name} (${window.location.origin}/produk/${product.id}).`;
-    window.open(`${wa}?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-  }
+  const orderMessage = (origin) =>
+    `Halo ${store.name}, saya ingin memesan ${qty} x ${product.name} (${rupiah(product.unitPrice)} per item), ` +
+    `total ${rupiah(product.unitPrice * qty)}.\nProduk: ${origin}/produk/${product.id}`;
 
   return (
     <div className="order-box">
@@ -60,35 +65,50 @@ export default function OrderPanel({ product, store }) {
         <strong>{rupiah(product.unitPrice * qty)}</strong>
       </div>
 
-      {closed && (
-        <div className="alert alert-warn" style={{ marginBottom: 12 }}>
-          Toko sedang tutup, jadi belum bisa menerima pesanan.
-        </div>
+      {webOrders ? (
+        <>
+          {closed && (
+            <div className="alert alert-warn" style={{ marginBottom: 12 }}>
+              Toko sedang tutup, jadi belum bisa menerima pesanan.
+            </div>
+          )}
+          <div className="order-actions">
+            <button type="button" className="btn btn-outline" onClick={() => add(false)} disabled={soldOut || closed}>
+              Tambah ke keranjang
+            </button>
+            <button type="button" className="btn btn-gold" onClick={() => add(true)} disabled={soldOut || closed}>
+              {soldOut ? 'Stok habis' : 'Beli sekarang'}
+            </button>
+          </div>
+          {added && (
+            <p className="added-note">
+              Ditambahkan ke keranjang. <Link href="/keranjang">Lihat keranjang</Link>
+            </p>
+          )}
+          <p className="muted small" style={{ margin: '10px 0 0' }}>
+            Pembayaran tunai saat barang sampai.
+          </p>
+        </>
+      ) : (
+        <>
+          <WhatsAppButton
+            phone={store?.phone}
+            productId={product.id}
+            label={soldOut ? 'Stok habis' : 'Pesan lewat WhatsApp'}
+            className="btn btn-gold btn-block"
+            message={orderMessage}
+            disabled={soldOut}
+          />
+          {closed && (
+            <p className="muted small" style={{ margin: '10px 0 0' }}>
+              Toko sedang tutup. Pesananmu akan dibalas saat toko buka kembali.
+            </p>
+          )}
+          <p className="muted small" style={{ margin: '10px 0 0' }}>
+            Pesanan, pembayaran, dan pengantaran disepakati langsung dengan penjual lewat WhatsApp.
+          </p>
+        </>
       )}
-
-      <div className="order-actions">
-        <button type="button" className="btn btn-outline" onClick={() => add(false)} disabled={soldOut || closed}>
-          Tambah ke keranjang
-        </button>
-        <button type="button" className="btn btn-gold" onClick={() => add(true)} disabled={soldOut || closed}>
-          {soldOut ? 'Stok habis' : 'Beli sekarang'}
-        </button>
-      </div>
-
-      {added && (
-        <p className="added-note">
-          Ditambahkan ke keranjang. <Link href="/keranjang">Lihat keranjang</Link>
-        </p>
-      )}
-
-      {wa && (
-        <button type="button" className="link-btn" onClick={askSeller}>
-          Tanya penjual lewat WhatsApp
-        </button>
-      )}
-      <p className="muted small" style={{ margin: '10px 0 0' }}>
-        Pembayaran tunai saat barang sampai.
-      </p>
     </div>
   );
 }

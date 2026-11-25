@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import StoreAvatar from './StoreAvatar';
+import VerifiedBadge from './VerifiedBadge';
 
 export default function StoreCard({ store }) {
   return (
@@ -9,7 +10,9 @@ export default function StoreCard({ store }) {
     >
       <StoreAvatar store={store} size="md" />
       <div className="store-info">
-        <h3>{store.name}</h3>
+        <h3>
+          {store.name} <VerifiedBadge store={store} />
+        </h3>
         {store.is_boosted && <span className="badge badge-gold">Pilihan</span>}
         {store.address && <p className="muted small">{store.address}</p>}
         <p className="small">

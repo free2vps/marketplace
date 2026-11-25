@@ -12,8 +12,9 @@ import { orderBreakdown } from '../../lib/fees';
 import { loadBuyer, saveBuyer, rememberOrder, normalizePhone } from '../../lib/localOrders';
 import SearchHeader from '../components/SearchHeader';
 import PageNav from '../components/PageNav';
+import WebOrdersGate from '../components/WebOrdersGate';
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter();
   const { cart, ready } = useCart();
   const [data, setData] = useState(null);
@@ -44,13 +45,40 @@ export default function CheckoutPage() {
   }, [ready, key]);
 
   const info = useMemo(() => describeCart(cart, data), [cart, data]);
+  // Ongkir: tetap per toko, atau dihitung server dari jarak bila mode jarak aktif
+  const [quote, setQuote] = useState(null);
+  const [quoteErr, setQuoteErr] = useState(null);
+  const storeId = info.store?.id;
+  const distanceMode = cfg?.shippingMode === 'distance';
+  useEffect(() => {
+    setQuote(null);
+    setQuoteErr(null);
+    if (!storeId || !distanceMode || !loc) return;
+    let live = true;
+    supabase
+      .rpc('shipping_quote', { p_store: storeId, p_lat: loc.lat, p_lng: loc.lng })
+      .then(({ data, error: qe }) => {
+        if (!live) return;
+        if (qe) setQuoteErr(qe.message);
+        else setQuote(data);
+      });
+    return () => {
+      live = false;
+    };
+  }, [storeId, distanceMode, loc]);
+
+  const needLocation = distanceMode && !loc;
+  const shippingFee = quote ? Number(quote.fee) : info.store ? Number(info.store.flat_shipping_fee) : 0;
+  const shippingDiscount = pay === 'qris' && cfg ? Math.min(cfg.digitalDiscount || 0, shippingFee) : 0;
+
   const fees = orderBreakdown({
     goods: info.subtotal,
-    shipping: info.store ? Number(info.store.flat_shipping_fee) : 0,
+    shipping: shippingFee,
     commissionPercent: cfg?.commissionOn ? cfg.commissionPercent : 0,
     serviceFee: cfg?.commissionOn ? cfg.serviceFee : 0,
   });
 
+  const grandTotal = fees.total - shippingDiscount;
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   function useMyLocation() {
@@ -78,6 +106,14 @@ export default function CheckoutPage() {
     setError(null);
     if (!info.canOrder) {
       setError('Isi keranjang perlu diperbaiki dulu.');
+      return;
+    }
+    if (needLocation) {
+      setError('Pilih titik lokasi dulu supaya ongkos kirim bisa dihitung.');
+      return;
+    }
+    if (quoteErr) {
+      setError(quoteErr);
       return;
     }
     const phone = normalizePhone(form.phone);
@@ -110,7 +146,7 @@ export default function CheckoutPage() {
     }
 
     saveBuyer({ name: form.name.trim(), phone, address: form.address.trim() });
-    rememberOrder({ code, phone, storeName: cart.store.name, total: fees.total });
+    rememberOrder({ code, phone, storeName: cart.store.name, total: grandTotal });
     clearCart();
     router.push(`/pesanan/${code}`);
   }
@@ -204,10 +240,11 @@ export default function CheckoutPage() {
               </label>
             )}
 
+            {quoteErr && <div className="alert alert-error" style={{ marginTop: 16 }}>{quoteErr}</div>}
             {error && <div className="alert alert-error" style={{ marginTop: 16 }}>{error}</div>}
 
-            <button className="btn btn-gold btn-block" style={{ marginTop: 16 }} type="submit" disabled={busy || !info.canOrder}>
-              {busy ? 'Memproses...' : `Pesan sekarang · ${rupiah(fees.total)}`}
+            <button className="btn btn-gold btn-block" style={{ marginTop: 16 }} type="submit" disabled={busy || !info.canOrder || needLocation || Boolean(quoteErr)}>
+              {busy ? 'Memproses...' : `Pesan sekarang · ${rupiah(grandTotal)}`}
             </button>
           </form>
 
@@ -228,11 +265,17 @@ export default function CheckoutPage() {
               ))}
             </ul>
             <div className="sum-row"><span>Subtotal</span><span>{rupiah(fees.goods)}</span></div>
-            <div className="sum-row"><span>Ongkos kirim</span><span>{fees.shipping > 0 ? rupiah(fees.shipping) : 'Gratis'}</span></div>
+            <div className="sum-row">
+              <span>Ongkos kirim{quote?.distance_km != null && ` (${quote.distance_km} km)`}</span>
+              <span>{needLocation ? 'Pilih lokasi' : fees.shipping > 0 ? rupiah(fees.shipping) : 'Gratis'}</span>
+            </div>
+            {shippingDiscount > 0 && (
+              <div className="sum-row"><span>Potongan ongkir (bayar QRIS)</span><span>−{rupiah(shippingDiscount)}</span></div>
+            )}
             {fees.serviceFee > 0 && (
               <div className="sum-row"><span>Biaya layanan aplikasi</span><span>{rupiah(fees.serviceFee)}</span></div>
             )}
-            <div className="sum-row sum-total"><span>Total</span><span>{rupiah(fees.total)}</span></div>
+            <div className="sum-row sum-total"><span>Total</span><span>{rupiah(grandTotal)}</span></div>
             <p className="muted small" style={{ margin: '10px 0 0' }}>
               Harga akhir dihitung ulang oleh sistem saat pesanan dibuat.
             </p>
@@ -240,5 +283,13 @@ export default function CheckoutPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <WebOrdersGate title="Checkout">
+      <CheckoutInner />
+    </WebOrdersGate>
   );
 }

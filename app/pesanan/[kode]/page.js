@@ -241,7 +241,17 @@ export default function PelacakanPage() {
           <p className="muted">
             Total {rupiah(order.total_amount)}. Toko baru memproses pesananmu setelah pembayaran diterima.
           </p>
-          {qr?.qrUrl ? (
+          {qr?.payUrl ? (
+            <div className="qr-box">
+              <a className="btn btn-gold" href={qr.payUrl} target="_blank" rel="noopener noreferrer">
+                Bayar sekarang
+              </a>
+              <div className="muted small">
+                Kamu akan diarahkan ke halaman pembayaran.
+                {qr.expiresAt && ` Berlaku sampai ${dateTime(qr.expiresAt)}.`}
+              </div>
+            </div>
+          ) : qr?.qrUrl ? (
             <div className="qr-box">
               <img src={qr.qrUrl} alt="Kode QRIS" width="240" height="240" />
               <div className="muted small">
@@ -251,7 +261,7 @@ export default function PelacakanPage() {
             </div>
           ) : (
             <button className="btn btn-gold" onClick={showQr} disabled={qrBusy}>
-              {qrBusy ? 'Membuat kode...' : 'Tampilkan kode QRIS'}
+              {qrBusy ? 'Menyiapkan...' : 'Bayar sekarang'}
             </button>
           )}
           <p className="muted small" style={{ margin: '10px 0 0' }}>Halaman ini otomatis berubah setelah pembayaran diterima.</p>
@@ -312,6 +322,9 @@ export default function PelacakanPage() {
         </ul>
         <div className="sum-row"><span>Subtotal</span><span>{rupiah(order.subtotal)}</span></div>
         <div className="sum-row"><span>Ongkos kirim</span><span>{Number(order.shipping_fee) > 0 ? rupiah(order.shipping_fee) : 'Gratis'}</span></div>
+        {Number(order.shipping_discount) > 0 && (
+          <div className="sum-row"><span>Potongan ongkir</span><span>−{rupiah(order.shipping_discount)}</span></div>
+        )}
         {Number(order.service_fee) > 0 && (
           <div className="sum-row"><span>Biaya layanan aplikasi</span><span>{rupiah(order.service_fee)}</span></div>
         )}

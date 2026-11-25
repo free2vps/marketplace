@@ -61,7 +61,8 @@ export default function ProdukPage() {
   const router = useRouter();
   const [store, setStore] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [cfg, setCfg] = useState({ commissionOn: false, commissionPercent: 0 });
+  const [cfg, setCfg] = useState({ commissionOn: false, commissionPercent: 0, freeProductLimit: 10 });
+  const [premiumUntil, setPremiumUntil] = useState(null);
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [file, setFile] = useState(null);
@@ -96,11 +97,12 @@ export default function ProdukPage() {
 
       const { data: storeData } = await supabase
         .from('stores')
-        .select('id, name, subscription_status')
+        .select('id, name, subscription_status, premium_until')
         .eq('owner_id', user.id)
         .single();
 
       setStore(storeData);
+      setPremiumUntil(storeData?.premium_until || null);
       setCfg(await loadSettings(supabase));
 
       if (storeData?.subscription_status === 'active') {
@@ -313,7 +315,7 @@ export default function ProdukPage() {
           </a>
           <h1>Kelola produk</h1>
           <div className="alert alert-warn">
-            Toko kamu belum aktif. Produk bisa dikelola setelah langganan diverifikasi.
+            Toko kamu belum tayang. Produk bisa dikelola setelah pendaftaran disetujui admin.
           </div>
         </main>
       </>
@@ -344,6 +346,19 @@ export default function ProdukPage() {
           &larr; Kembali ke dashboard
         </a>
         <h1>Produk {store.name}</h1>
+
+        {!(premiumUntil && new Date(premiumUntil) > new Date()) && (
+          <div className="alert alert-warn">
+            Paket Gratis: {products.length} dari {cfg.freeProductLimit} produk.{' '}
+            <a href="/dashboard-toko/paket">Tingkatkan ke Premium</a> untuk produk tanpa batas.
+          </div>
+        )}
+        {products.some((p) => p.locked) && (
+          <div className="alert alert-error">
+            {products.filter((p) => p.locked).length} produk disembunyikan dari pembeli karena melebihi batas paket Gratis.
+            Perpanjang Premium untuk menampilkannya lagi.
+          </div>
+        )}
 
         <form className="panel" onSubmit={handleSubmit}>
           <h2>{editing ? 'Edit produk' : 'Tambah produk'}</h2>
@@ -519,6 +534,7 @@ export default function ProdukPage() {
                     <div>
                       <span className="product-name">{p.name}</span>
                       {!p.is_available && <span className="muted small"> (disembunyikan)</span>}
+                      {p.locked && <span className="muted small"> (terkunci: melebihi batas paket)</span>}
                       <div className="muted small">
                         {p.categories?.name || 'Tanpa kategori'}
                         {p.stock != null ? ` · stok ${p.stock}` : ''}

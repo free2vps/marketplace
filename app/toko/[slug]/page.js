@@ -1,10 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '../../../lib/supabase';
-import { whatsappLink } from '../../../lib/media';
 import SearchHeader from '../../components/SearchHeader';
 import PageNav from '../../components/PageNav';
 import StoreAvatar from '../../components/StoreAvatar';
+import VerifiedBadge from '../../components/VerifiedBadge';
+import WhatsAppButton from '../../components/WhatsAppButton';
 import ProductCard from '../../components/ProductCard';
 import TrackVisit from '../../components/TrackVisit';
 
@@ -14,7 +15,7 @@ export default async function TokoPage({ params, searchParams }) {
   const { data: store } = await supabase
     .from('stores')
     .select(
-      'id, name, slug, logo_url, description, address, phone, is_boosted, is_open, rating_avg, rating_count'
+      'id, name, slug, logo_url, description, address, phone, is_boosted, is_open, verified_at, rating_avg, rating_count'
     )
     .eq('slug', params.slug)
     .maybeSingle();
@@ -52,8 +53,6 @@ export default async function TokoPage({ params, searchParams }) {
     ? (products || []).filter((p) => p.categories?.slug === kategori)
     : products || [];
 
-  const wa = whatsappLink(store.phone);
-
   return (
     <>
       <SearchHeader />
@@ -65,7 +64,9 @@ export default async function TokoPage({ params, searchParams }) {
           <div className="grow">
             <div className="store-title">
               <StoreAvatar store={store} size="lg" />
-              <h1>{store.name}</h1>
+              <h1>
+                {store.name} <VerifiedBadge store={store} size={22} />
+              </h1>
             </div>
             <p>
               {store.rating_count > 0 ? (
@@ -86,11 +87,12 @@ export default async function TokoPage({ params, searchParams }) {
               </span>
             </p>
           </div>
-          {wa && (
-            <a className="btn btn-gold" href={wa} target="_blank" rel="noopener noreferrer">
-              Chat WhatsApp
-            </a>
-          )}
+          <WhatsAppButton
+            phone={store.phone}
+            slug={store.slug}
+            label="Chat WhatsApp"
+            message={`Halo ${store.name}, saya melihat tokomu di UMKM Taliwang dan ingin bertanya.`}
+          />
         </div>
       </section>
 

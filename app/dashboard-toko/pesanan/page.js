@@ -60,7 +60,7 @@ export default function PesananTokoPage() {
       }
       const { data: s } = await supabase
         .from('stores')
-        .select('id, name, subscription_status')
+        .select('id, name, subscription_status, is_premium, premium_until')
         .eq('owner_id', user.id)
         .single();
       setStore(s);
@@ -225,6 +225,17 @@ export default function PesananTokoPage() {
                     <button className="btn btn-gold btn-sm" disabled={busy} onClick={() => setStatus(o, 'selesai', 'Tandai pesanan ini selesai?')}>
                       Tandai selesai
                     </button>
+                  )}
+                  {o.status !== 'dibatalkan' && (
+                    store?.premium_until && new Date(store.premium_until) > new Date() ? (
+                      <a className="btn btn-outline btn-sm" href={`/dashboard-toko/pesanan/${o.id}/label`}>
+                        Cetak label
+                      </a>
+                    ) : (
+                      <a className="btn btn-outline btn-sm" href="/dashboard-toko/paket" title="Fitur Premium">
+                        Cetak label (Premium)
+                      </a>
+                    )
                   )}
                   {['disiapkan', 'siap_diantar'].includes(o.status) && (
                     <button className="btn btn-danger btn-sm" disabled={busy} onClick={() => setStatus(o, 'dibatalkan', 'Batalkan pesanan ini? Pembeli akan melihat statusnya.')}>

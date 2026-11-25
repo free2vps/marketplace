@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { rupiah, productImage, activePromo, discountPercent } from '../../lib/media';
 import StoreAvatar from './StoreAvatar';
+import VerifiedBadge from './VerifiedBadge';
 
 export default function ProductCard({ product: p, href, showStore = true }) {
   const promo = activePromo(p);
@@ -41,6 +42,7 @@ export default function ProductCard({ product: p, href, showStore = true }) {
           <div className="pcard-store">
             <StoreAvatar store={p.stores} size="sm" />
             <span>{p.stores.name}</span>
+            <VerifiedBadge store={p.stores} size={13} />
           </div>
         )}
       </div>
