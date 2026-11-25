@@ -36,7 +36,7 @@ export default function DashboardTokoPage() {
 
       const { data: storeData } = await supabase
         .from('stores')
-        .select('*')
+        .select('id, name, address, phone, is_open, subscription_status, premium_until, flat_shipping_fee')
         .eq('owner_id', user.id)
         .single();
 

@@ -29,9 +29,10 @@ export default async function HomePage({ searchParams }) {
   const q = String(searchParams?.q || '').trim().slice(0, 60);
   const kategori = String(searchParams?.kategori || '');
   const tab = TABS.some((t) => t.key === searchParams?.tab) ? searchParams.tab : 'terlaris';
-  const limit = Math.min(Number(searchParams?.n) || PAGE_SIZE, 120);
+  const requested = Number(searchParams?.n);
+  const limit = Number.isFinite(requested) ? Math.max(PAGE_SIZE, Math.min(Math.floor(requested), 120)) : PAGE_SIZE;
 
-  const [{ data: categories }, { data: popular }] = await Promise.all([
+  const [{ data: categories }, { data: popular }, { data: bannerRows }, { data: slotRows }, { data: topStores }] = await Promise.all([
     supabase.from('categories').select('id, name, slug').order('name'),
     supabase
       .from('search_terms')
@@ -39,9 +40,17 @@ export default async function HomePage({ searchParams }) {
       .order('hits', { ascending: false })
       .order('last_at', { ascending: false })
       .limit(6),
+    supabase.from('banners').select('id, slot, title, image_path, link_type, link_value'),
+    supabase.from('banner_slots').select('key, width, height').eq('is_active', true),
+    supabase.from('stores')
+      .select('id, name, slug, logo_url, address, is_boosted, verified_at, rating_avg, rating_count')
+      .eq('subscription_status', 'active')
+      .order('is_boosted', { ascending: false })
+      .order('rating_avg', { ascending: false })
+      .order('visit_count', { ascending: false })
+      .limit(4),
+    ...(q ? [supabase.rpc('log_search', { p_term: q })] : []),
   ]);
-
-  if (q) await supabase.rpc('log_search', { p_term: q });
 
   let query = supabase
     .from('products')
@@ -83,10 +92,6 @@ export default async function HomePage({ searchParams }) {
   const products = (rows || []).slice(0, limit);
 
   // Banner sewa yang sedang tayang (tabel hanya memberi banner yang disetujui dan dalam tanggalnya)
-  const [{ data: bannerRows }, { data: slotRows }] = await Promise.all([
-    supabase.from('banners').select('id, slot, title, image_path, link_type, link_value'),
-    supabase.from('banner_slots').select('key, width, height').eq('is_active', true),
-  ]);
   const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
   const bannersOf = (slot) => shuffle((bannerRows || []).filter((b) => b.slot === slot));
   const ratioOf = (slot) => {
@@ -95,15 +100,6 @@ export default async function HomePage({ searchParams }) {
   };
   const topBanners = bannersOf('home_top');
   const middleBanners = bannersOf('home_middle');
-
-  const { data: topStores } = await supabase
-    .from('stores')
-    .select('id, name, slug, logo_url, address, is_boosted, verified_at, rating_avg, rating_count')
-    .eq('subscription_status', 'active')
-    .order('is_boosted', { ascending: false })
-    .order('rating_avg', { ascending: false })
-    .order('visit_count', { ascending: false })
-    .limit(4);
 
   return (
     <>
@@ -161,7 +157,7 @@ export default async function HomePage({ searchParams }) {
         </nav>
 
         {error && (
-          <div className="alert alert-error">Produk belum bisa dimuat: {error.message}</div>
+          <div className="alert alert-error" role="alert">Produk belum bisa dimuat. Periksa koneksi dan coba muat ulang halaman.</div>
         )}
 
         {!error && products.length === 0 && (
