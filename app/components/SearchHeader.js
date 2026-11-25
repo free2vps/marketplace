@@ -23,6 +23,7 @@ export default function SearchHeader({ q = '' }) {
         </form>
 
         <nav className="nav">
+          <Link className="nav-link" href="/toko">Toko</Link>
           <HeaderOrderLinks />
           <Link className="nav-link hide-sm" href="/masuk-toko">
             Masuk
